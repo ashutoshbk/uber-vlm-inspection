@@ -1,8 +1,8 @@
 # Wiper Movement Detection
 
-Detects if windshield wipers are actively wiping by analyzing consecutive video frames using VLM.
+Detects if windshield wipers are actively wiping by analyzing consecutive video frames using AWS Bedrock VLM.
 
-**Status:** Code ready, not yet tested with real videos. MLflow integration pending.
+**Status:** Code ready, not yet tested with real videos.
 
 ## How It Works
 
@@ -22,6 +22,9 @@ python wiper_detector.py --video wiper_video.mp4 --interval 1
 
 # Save extracted frames to disk
 python wiper_detector.py --video wiper_video.mp4 --save
+
+# Custom run name for MLflow
+python wiper_detector.py --video wiper_video.mp4 --run-name "wiper-test"
 ```
 
 ## Output
@@ -37,8 +40,23 @@ Returns: `verdict` (functioning / partially active / not moving / no wiper detec
 | WIPER NOT MOVING | Visible but no movement |
 | NO WIPER DETECTED | Not visible in any frames |
 
+## MLflow
+
+- **Experiment:** `wiper-detection-vlm`
+- **Params:** model, provider, region, video name, interval, total pairs
+- **Metrics:** wiper visible/active per pair, active rate %
+- **Artifacts:** results JSON, prompt template
+
 ## Environment Variables
 
 ```bash
-set OPENAI_API_KEY=your_key
+# AWS credentials (stored in conda env, never in code)
+AWS_ACCESS_KEY_ID=your_key
+AWS_SECRET_ACCESS_KEY=your_secret
+AWS_DEFAULT_REGION=ap-south-1
+
+# MLflow
+MLFLOW_TRACKING_URI=your_mlflow_url
+MLFLOW_TRACKING_USERNAME=your_username
+MLFLOW_TRACKING_PASSWORD=your_password
 ```

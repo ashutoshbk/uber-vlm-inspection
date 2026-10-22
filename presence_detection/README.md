@@ -1,6 +1,6 @@
 # Presence Detection
 
-Detects whether specific safety items are present in vehicle photos using VLM.
+Detects whether specific safety items are present in vehicle photos using AWS Bedrock VLM.
 
 ## Supported Items
 
@@ -28,6 +28,9 @@ python presence_detector.py --image photo.jpg --item all
 
 # Multiple images, all items
 python presence_detector.py --image img1.jpg img2.jpg --item all
+
+# Custom run name for MLflow
+python presence_detector.py --image photo.jpg --item all --run-name "my-test"
 ```
 
 ## Output
@@ -37,15 +40,20 @@ Returns per item: `present` (true/false), `condition` (good/damaged/unclear), `c
 ## MLflow
 
 - **Experiment:** `presence-detection-vlm`
-- **Params:** model, items checked, number of images
+- **Params:** model, provider, region, items checked, number of images
 - **Metrics:** present/absent per item, API duration, totals
 - **Artifacts:** results JSON, prompt template
 
 ## Environment Variables
 
 ```bash
-set OPENAI_API_KEY=your_key
-set MLFLOW_TRACKING_URI=your_mlflow_url
-set MLFLOW_TRACKING_USERNAME=your_username
-set MLFLOW_TRACKING_PASSWORD=your_password
+# AWS credentials (stored in conda env, never in code)
+AWS_ACCESS_KEY_ID=your_key
+AWS_SECRET_ACCESS_KEY=your_secret
+AWS_DEFAULT_REGION=ap-south-1
+
+# MLflow
+MLFLOW_TRACKING_URI=your_mlflow_url
+MLFLOW_TRACKING_USERNAME=your_username
+MLFLOW_TRACKING_PASSWORD=your_password
 ```

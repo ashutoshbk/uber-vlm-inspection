@@ -1,8 +1,8 @@
 """
-Tyre Tread Assessment — OpenAI VLM (GPT-4o)
-=============================================
+Tyre Tread Assessment — AWS Bedrock (Amazon Nova Lite)
+======================================================
 Assesses tyre condition (tread depth, wear patterns, damage) from vehicle
-photos using OpenAI's vision API. Acts as a professional tyre assessor.
+photos using AWS Bedrock's vision API. Acts as a professional tyre assessor.
 
 Supported tyre positions:
   - front_left     : Front left tyre
@@ -13,27 +13,30 @@ Supported tyre positions:
 
 Usage:
   # Single tyre assessment
-  python tyre_assessor.py --image front_left.jpg --position front_left --api-key sk-xxx
+  python tyre_assessor.py --image front_left.jpg --position front_left
 
   # Assess multiple tyres
-  python tyre_assessor.py --image fl.jpg fr.jpg bl.jpg br.jpg --position front_left front_right back_left back_right --api-key sk-xxx
+  python tyre_assessor.py --image fl.jpg fr.jpg bl.jpg br.jpg --position front_left front_right back_left back_right
 
   # Assess all positions (one image per position, in order)
-  python tyre_assessor.py --image fl.jpg fr.jpg bl.jpg br.jpg spare.jpg --position all --api-key sk-xxx
+  python tyre_assessor.py --image fl.jpg fr.jpg bl.jpg br.jpg spare.jpg --position all
 
-  # Use env var for API key
-  set OPENAI_API_KEY=sk-xxx
-  python tyre_assessor.py --image front_left.jpg --position front_left
+  # Custom run name for MLflow
+  python tyre_assessor.py --image front_left.jpg --position front_left --run-name "bedrock-test"
+
+Environment variables required:
+  AWS_ACCESS_KEY_ID, AWS_SECRET_ACCESS_KEY, AWS_DEFAULT_REGION
+  MLFLOW_TRACKING_URI, MLFLOW_TRACKING_USERNAME, MLFLOW_TRACKING_PASSWORD
 """
 
 import argparse
 import base64
+import boto3
 import cv2
 import json
 import os
 import sys
 import time
-from openai import OpenAI
 import mlflow
 
 
@@ -144,34 +147,36 @@ def image_to_base64(image_path, max_width=1024):
     return base64.b64encode(buffer).decode("utf-8")
 
 
-def assess_tyre(client, model, image_path, position_key):
+def assess_tyre(bedrock_client, model, image_path, position_key):
     if position_key not in POSITIONS:
         raise ValueError(f"Unknown position: {position_key}. Available: {list(POSITIONS.keys())}")
 
     prompt = build_prompt(position_key)
     b64 = image_to_base64(image_path)
+    image_bytes = base64.b64decode(b64)
 
     start_time = time.time()
-    response = client.chat.completions.create(
-        model=model,
+    response = bedrock_client.converse(
+        modelId=model,
         messages=[
             {
                 "role": "user",
                 "content": [
-                    {"type": "text", "text": prompt},
+                    {"text": prompt},
                     {
-                        "type": "image_url",
-                        "image_url": {"url": f"data:image/jpeg;base64,{b64}", "detail": "high"},
+                        "image": {
+                            "format": "jpeg",
+                            "source": {"bytes": image_bytes},
+                        }
                     },
                 ],
             }
         ],
-        max_tokens=400,
-        temperature=0,
+        inferenceConfig={"maxTokens": 400, "temperature": 0},
     )
 
     api_duration = time.time() - start_time
-    answer = response.choices[0].message.content.strip()
+    answer = response["output"]["message"]["content"][0]["text"].strip()
 
     try:
         if "```json" in answer:
@@ -195,14 +200,14 @@ def assess_tyre(client, model, image_path, position_key):
 # ── CLI ────────────────────────────────────────────────────────────────────
 
 def main():
-    parser = argparse.ArgumentParser(description="Vehicle Tyre Tread Assessment using OpenAI VLM")
+    parser = argparse.ArgumentParser(description="Vehicle Tyre Tread Assessment using AWS Bedrock VLM")
     parser.add_argument("--image", nargs="+", required=True, help="Path(s) to tyre image(s)")
     parser.add_argument("--position", nargs="+", required=True,
                         help=f"Tyre position(s): {', '.join(POSITIONS.keys())}, or 'all'")
-    parser.add_argument("--api-key", default=None,
-                        help="OpenAI API key (or set OPENAI_API_KEY env var)")
-    parser.add_argument("--model", default="gpt-4o",
-                        help="OpenAI model (default: gpt-4o)")
+    parser.add_argument("--model", default="apac.amazon.nova-lite-v1:0",
+                        help="Bedrock model ID (default: apac.amazon.nova-lite-v1:0)")
+    parser.add_argument("--region", default=None,
+                        help="AWS region (or set AWS_DEFAULT_REGION env var)")
     parser.add_argument("--output", default=None,
                         help="Output JSON path (default: tyre_results.json)")
     parser.add_argument("--mlflow-tracking-uri", default=None,
@@ -213,12 +218,8 @@ def main():
                         help="Custom MLflow run name (e.g. 'good-tyres', 'bad-tyres')")
     args = parser.parse_args()
 
-    api_key = args.api_key or os.environ.get("OPENAI_API_KEY")
-    if not api_key:
-        print("Error: provide --api-key or set OPENAI_API_KEY env var")
-        sys.exit(1)
-
-    client = OpenAI(api_key=api_key)
+    region = args.region or os.environ.get("AWS_DEFAULT_REGION", "ap-south-1")
+    bedrock_client = boto3.client("bedrock-runtime", region_name=region)
 
     positions_to_check = list(POSITIONS.keys()) if "all" in args.position else args.position
 
@@ -238,11 +239,12 @@ def main():
         print("Each image corresponds to one tyre position, in order.")
         sys.exit(1)
 
-    # ── MLflow Setup ────────────────────────────────────────────────────
     tracking_uri = args.mlflow_tracking_uri or os.environ.get("MLFLOW_TRACKING_URI")
     if tracking_uri:
         mlflow.set_tracking_uri(tracking_uri)
     mlflow.set_experiment(args.experiment)
+
+    run_name = args.run_name or f"tyre-assess-{len(positions_to_check)}tyres"
 
     print("=" * 60)
     print("  TYRE TREAD ASSESSMENT")
@@ -250,16 +252,18 @@ def main():
     print(f"  Tyres to assess: {len(positions_to_check)}")
     print(f"  Positions: {', '.join(positions_to_check)}")
     print(f"  Model: {args.model}")
+    print(f"  Provider: AWS Bedrock")
+    print(f"  Region: {region}")
     print(f"  MLflow experiment: {args.experiment}")
     print("=" * 60)
 
     all_results = []
 
-    run_name = args.run_name or f"tyre-assess-{len(positions_to_check)}tyres"
-
     with mlflow.start_run(run_name=run_name):
 
         mlflow.log_param("model", args.model)
+        mlflow.log_param("provider", "aws-bedrock")
+        mlflow.log_param("region", region)
         mlflow.log_param("positions_checked", ",".join(positions_to_check))
         mlflow.log_param("num_tyres", len(positions_to_check))
         mlflow.log_param("image_names", ",".join(os.path.basename(img) for img in args.image))
@@ -274,7 +278,7 @@ def main():
             print(f"  {'-' * 50}")
 
             try:
-                result = assess_tyre(client, args.model, img_path, pos_key)
+                result = assess_tyre(bedrock_client, args.model, img_path, pos_key)
 
                 verdict = result.get("result", "?").upper()
                 tread = result.get("tread_depth", "?")

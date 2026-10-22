@@ -33,26 +33,28 @@ uber-vlm-inspection/
 └── README.md
 ```
 
-## Current Provider: OpenAI GPT-4o
+## Provider: AWS Bedrock (Amazon Nova Lite)
 
-All scripts currently use **OpenAI GPT-4o** via the OpenAI API.
+All scripts use **AWS Bedrock** with the **Amazon Nova Lite** vision model (`apac.amazon.nova-lite-v1:0`).
 
 ### Setup
 
-1. Install dependencies (per module):
+1. Create a conda environment and set AWS credentials as environment variables:
    ```bash
-   pip install -r presence_detection/requirements.txt
+   conda create -n bedrock_vlm python=3.10 -y
+   conda activate bedrock_vlm
+   conda env config vars set AWS_ACCESS_KEY_ID=your_key
+   conda env config vars set AWS_SECRET_ACCESS_KEY=your_secret
+   conda env config vars set AWS_DEFAULT_REGION=ap-south-1
+   conda env config vars set MLFLOW_TRACKING_URI=your_mlflow_url
+   conda env config vars set MLFLOW_TRACKING_USERNAME=your_username
+   conda env config vars set MLFLOW_TRACKING_PASSWORD=your_password
+   conda deactivate && conda activate bedrock_vlm
    ```
 
-2. Set environment variables:
+2. Install dependencies (per module):
    ```bash
-   # OpenAI
-   set OPENAI_API_KEY=your_key_here
-
-   # MLflow (for experiment tracking)
-   set MLFLOW_TRACKING_URI=your_mlflow_server_url
-   set MLFLOW_TRACKING_USERNAME=your_username
-   set MLFLOW_TRACKING_PASSWORD=your_password
+   pip install -r presence_detection/requirements.txt
    ```
 
 3. Run any module:
@@ -72,10 +74,4 @@ All modules log experiments to MLflow:
 | Presence Detection | `presence-detection-vlm` | Item present/absent, confidence, API duration |
 | Tyre Assessment | `tyre-assessment-vlm` | Pass/fail, tread score, wear details |
 | Interior Cleanliness | `interior-cleanliness-vlm` | Cleanliness score (1-10), issues found |
-| Wiper Detection | — | Not yet integrated |
-
-## Important
-
-- **Never commit API keys or credentials** — use environment variables
-- **Test images are not tracked** — generate them locally or use your own
-- **Model files (.pt, .pth) are excluded** — too large for GitHub
+| Wiper Detection | `wiper-detection-vlm` | Wiper visible/active per pair, verdict |

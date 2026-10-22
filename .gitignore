@@ -21,9 +21,6 @@ __pycache__/
 .DS_Store
 Thumbs.db
 
-# Test images (generated locally)
-test_images/
-
 # Results (generated per run)
 *_results.json
 

@@ -1,6 +1,6 @@
 # Interior Cleanliness Assessment
 
-Assesses vehicle interior cleanliness from photos using VLM. Acts as a professional interior inspector for ride-sharing compliance.
+Assesses vehicle interior cleanliness from photos using AWS Bedrock VLM. Acts as a professional interior inspector for ride-sharing compliance.
 
 ## What It Checks
 
@@ -29,15 +29,20 @@ Returns per image: `result` (pass/fail), `cleanliness_score` (1-10), seat/floor/
 ## MLflow
 
 - **Experiment:** `interior-cleanliness-vlm`
-- **Params:** model, number of images, image names
+- **Params:** model, provider, region, number of images, image names
 - **Metrics:** pass/fail per image, cleanliness score, average score, pass rate %
 - **Artifacts:** results JSON, prompt template
 
 ## Environment Variables
 
 ```bash
-set OPENAI_API_KEY=your_key
-set MLFLOW_TRACKING_URI=your_mlflow_url
-set MLFLOW_TRACKING_USERNAME=your_username
-set MLFLOW_TRACKING_PASSWORD=your_password
+# AWS credentials (stored in conda env, never in code)
+AWS_ACCESS_KEY_ID=your_key
+AWS_SECRET_ACCESS_KEY=your_secret
+AWS_DEFAULT_REGION=ap-south-1
+
+# MLflow
+MLFLOW_TRACKING_URI=your_mlflow_url
+MLFLOW_TRACKING_USERNAME=your_username
+MLFLOW_TRACKING_PASSWORD=your_password
 ```

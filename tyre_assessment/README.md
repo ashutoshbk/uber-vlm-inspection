@@ -1,6 +1,6 @@
 # Tyre Tread Assessment
 
-Assesses tyre condition (tread depth, wear, sidewall damage) from vehicle photos using VLM. Acts as a professional tyre inspector.
+Assesses tyre condition (tread depth, wear, sidewall damage) from vehicle photos using AWS Bedrock VLM. Acts as a professional tyre inspector.
 
 ## Supported Positions
 
@@ -41,15 +41,20 @@ Returns per tyre: `result` (pass/fail), `tread_depth`, `wear_evenness`, `sidewal
 ## MLflow
 
 - **Experiment:** `tyre-assessment-vlm`
-- **Params:** model, positions checked, image names
+- **Params:** model, provider, region, positions checked, image names
 - **Metrics:** pass/fail per tyre, tread score (0-3), API duration, pass rate %
 - **Artifacts:** results JSON, prompt template
 
 ## Environment Variables
 
 ```bash
-set OPENAI_API_KEY=your_key
-set MLFLOW_TRACKING_URI=your_mlflow_url
-set MLFLOW_TRACKING_USERNAME=your_username
-set MLFLOW_TRACKING_PASSWORD=your_password
+# AWS credentials (stored in conda env, never in code)
+AWS_ACCESS_KEY_ID=your_key
+AWS_SECRET_ACCESS_KEY=your_secret
+AWS_DEFAULT_REGION=ap-south-1
+
+# MLflow
+MLFLOW_TRACKING_URI=your_mlflow_url
+MLFLOW_TRACKING_USERNAME=your_username
+MLFLOW_TRACKING_PASSWORD=your_password
 ```
