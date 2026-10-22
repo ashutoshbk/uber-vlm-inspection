@@ -1,0 +1,31 @@
+# Model files
+*.pt
+*.pth
+*.onnx
+*.bin
+
+# MLflow local data
+mlflow.db
+mlruns/
+
+# Python
+__pycache__/
+*.pyc
+
+# Secrets
+.env
+*.secret
+*.credentials
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# Test images (generated locally)
+test_images/
+
+# Results (generated per run)
+*_results.json
+
+# Local notes
+cmd.txt
