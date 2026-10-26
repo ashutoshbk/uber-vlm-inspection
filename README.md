@@ -16,7 +16,7 @@ Vehicle inspection system using Vision Language Models (VLM) for ride-sharing co
 | 8 | Tyres | Back left tyre | Photo | Done |
 | 9 | Tyres | Back right tyre | Photo | Done |
 | 10 | Tyres | Spare tyre | Photo | Done |
-| 11 | Vehicle Functionality | Wiper functionality | Video | Code ready (untested) |
+| 11 | Vehicle Functionality | Wiper functionality | Video | Done |
 | 12 | Vehicle Functionality | All lights | Video | Done |
 | 13 | Vehicle Functionality | Seat belts | Photo | Done |
 | 14 | General | Interior cleanliness | Photo | Done |
@@ -64,6 +64,8 @@ All scripts use **AWS Bedrock** with the **Amazon Nova Lite** vision model (`apa
    python tyre_assessment/tyre_assessor.py --image tyre.jpg --position front_left
    python interior_cleanliness/interior_assessor.py --image interior.jpg
    python wiper_detection/wiper_detector.py --video wiper.mp4
+   python lights_validation/lights_validator.py --video headlamp.mp4 --type headlamp
+   python lights_validation/lights_validator.py --video taillamp.mp4 --type taillamp
    ```
 
 ## MLflow Tracking
