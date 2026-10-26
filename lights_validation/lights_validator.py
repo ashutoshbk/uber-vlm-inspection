@@ -12,7 +12,7 @@ Supported light types:
 Logic:
   1. Extract frames from video at regular intervals (default: every 1 second)
   2. Send each frame to the VLM to check if the light is ON or OFF
-  3. If light is ON in majority of frames → light is functioning (PASS)
+  3. If light is ON in at least one frame → light is functioning (PASS)
   4. If light is OFF in all frames → light is not working (FAIL)
 
 Usage:

@@ -5,10 +5,10 @@ Detects if a car windshield wiper is actively wiping by comparing
 consecutive video frames using AWS Bedrock's vision API.
 
 Logic:
-  1. Extract frames from video at regular intervals (default: every 2 seconds)
+  1. Extract frames from video at regular intervals (default: every 1 second)
   2. Send pairs of consecutive frames to the VLM
   3. Ask if the wiper position changed between the two frames
-  4. If wiper moves in majority of pairs → wiper is functioning
+  4. If wiper position changed in at least one pair → wiper is functioning
 
 Usage:
   python wiper_detector.py --video wiper_video.mp4
@@ -260,13 +260,11 @@ def main():
         print(f"  Wiper active:          {active_count}/{num_pairs}")
 
         if visible_count == 0:
-            verdict = "NO WIPER DETECTED"
-        elif active_count > num_pairs * 0.5:
-            verdict = "WIPER IS FUNCTIONING — active in majority of frames"
+            verdict = "NO WIPER DETECTED — not visible in any frame"
         elif active_count > 0:
-            verdict = "WIPER PARTIALLY ACTIVE — intermittent movement detected"
+            verdict = f"WIPER IS FUNCTIONING — position changed in {active_count}/{num_pairs} pairs"
         else:
-            verdict = "WIPER NOT MOVING — no movement detected"
+            verdict = "WIPER NOT MOVING — visible but no movement detected"
 
         print(f"\n  VERDICT: {verdict}")
         print("=" * 60)
