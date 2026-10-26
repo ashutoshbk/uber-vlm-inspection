@@ -17,7 +17,7 @@ Vehicle inspection system using Vision Language Models (VLM) for ride-sharing co
 | 9 | Tyres | Back right tyre | Photo | Done |
 | 10 | Tyres | Spare tyre | Photo | Done |
 | 11 | Vehicle Functionality | Wiper functionality | Video | Code ready (untested) |
-| 12 | Vehicle Functionality | All lights | Video | Pending |
+| 12 | Vehicle Functionality | All lights | Video | Done |
 | 13 | Vehicle Functionality | Seat belts | Photo | Done |
 | 14 | General | Interior cleanliness | Photo | Done |
 | 15 | General | Mobile holder | Photo | Done |
@@ -30,6 +30,7 @@ uber-vlm-inspection/
 ├── tyre_assessment/         # Use cases 6-10 (tyre tread assessment)
 ├── interior_cleanliness/    # Use case 14 (interior condition review)
 ├── wiper_detection/         # Use case 11 (wiper movement from video)
+├── lights_validation/       # Use case 12 (headlamp & tail lamp check)
 └── README.md
 ```
 
@@ -75,3 +76,4 @@ All modules log experiments to MLflow:
 | Tyre Assessment | `tyre-assessment-vlm` | Pass/fail, tread score, wear details |
 | Interior Cleanliness | `interior-cleanliness-vlm` | Cleanliness score (1-10), issues found |
 | Wiper Detection | `wiper-detection-vlm` | Wiper visible/active per pair, verdict |
+| Lights Validation | `lights-validation-vlm` | Lights ON/OFF per frame, pass/fail |

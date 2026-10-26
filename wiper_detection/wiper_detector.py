@@ -146,8 +146,8 @@ def main():
                         help="Bedrock model ID (default: apac.amazon.nova-lite-v1:0)")
     parser.add_argument("--region", default=None,
                         help="AWS region (or set AWS_DEFAULT_REGION env var)")
-    parser.add_argument("--interval", type=float, default=2.0,
-                        help="Frame extraction interval in seconds (default: 2.0)")
+    parser.add_argument("--interval", type=float, default=1.0,
+                        help="Frame extraction interval in seconds (default: 1.0)")
     parser.add_argument("--save", action="store_true",
                         help="Save extracted frames to disk")
     parser.add_argument("--output", default=None,
